@@ -17,7 +17,7 @@ NTSTATUS Driver::_Routine_AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT 
 	{
 		status = driver->_AddDevice(DriverObject, PhysicalDeviceObject);
 	}
-	KdPrint(("%s Leave  status : %d\n", __FUNCTION__, status));
+	KdPrint(("%s Leave  status : 0x%08X\n", __FUNCTION__, status));
 	return status;
 }
 
@@ -51,8 +51,8 @@ NTSTATUS Driver::_Routine_MajorFunction(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PCCHAR mjName, mnName;
 	::GetFunctionName(&mjName, &mnName, mj, mn);
 
-	KdPrint(("MajorFunction(%d) : %s\n", mj, mjName ? mjName : ""));
-	KdPrint(("MinorFunction(%d) : %s\n", mn, mnName ? mnName : ""));
+	KdPrint(("MajorFunction(0x%08X) : %s\n", mj, mjName ? mjName : ""));
+	KdPrint(("MinorFunction(0x%08X) : %s\n", mn, mnName ? mnName : ""));
 
 	NTSTATUS status = STATUS_SUCCESS;
 
@@ -77,7 +77,7 @@ NTSTATUS Driver::_Routine_MajorFunction(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 
 	}
 
-	KdPrint(("%s Leave  status : %d\n", __FUNCTION__, status));
+	KdPrint(("%s Leave  status : 0x%08X\n", __FUNCTION__, status));
 	return status;
 }
 
@@ -85,14 +85,14 @@ NTSTATUS Driver::_Routine_MajorFunction(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 //默认FastIo例程函数签名宏
 #define __Routine_FastIoDispatch_Signature__(name) BOOLEAN Driver::__Routine_FastIoDispatch_Name__(name)
 #define __Routine_FastIoDispatch_DefaultHandle__(name,...) \
-KdPrint(("%s Enter\n"));\
+KdPrint(("%s Enter\n",__FUNCTION__));\
 BOOLEAN ret = false;\
 PDriver driver = GetDriver(DeviceObject->DriverObject);\
-if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->##name)\
+if (driver && driver->_FastIoDispatch.##name)\
 {\
-	ret = driver->_FastIoDispatch->##name(__VA_ARGS__);\
+	ret = driver->_FastIoDispatch.##name(__VA_ARGS__);\
 }\
-KdPrint(("%s Leave    Return : %d\n", __FUNCTION__, ret));\
+KdPrint(("%s Leave    Return : 0x%08X\n", __FUNCTION__, ret));\
 return ret;\
 
 __Routine_FastIoDispatch_Signature__(FastIoCheckIfPossible)(
@@ -229,12 +229,12 @@ VOID Driver::__Routine_FastIoDispatch_Name__(AcquireFileForNtCreateSection)(
 	_In_ struct _FILE_OBJECT* FileObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	PDEVICE_OBJECT DeviceObject = IoGetRelatedDeviceObject(FileObject);
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->AcquireFileForNtCreateSection)
+	if (driver && driver->_FastIoDispatch.AcquireFileForNtCreateSection)
 	{
-		driver->_FastIoDispatch->AcquireFileForNtCreateSection(FileObject);
+		driver->_FastIoDispatch.AcquireFileForNtCreateSection(FileObject);
 	}
 	KdPrint(("%s Leave\n", __FUNCTION__));
 }
@@ -243,12 +243,12 @@ VOID Driver::__Routine_FastIoDispatch_Name__(ReleaseFileForNtCreateSection)(
 	_In_ struct _FILE_OBJECT* FileObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	PDEVICE_OBJECT DeviceObject = IoGetRelatedDeviceObject(FileObject);
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->ReleaseFileForNtCreateSection)
+	if (driver && driver->_FastIoDispatch.ReleaseFileForNtCreateSection)
 	{
-		driver->_FastIoDispatch->ReleaseFileForNtCreateSection(FileObject);
+		driver->_FastIoDispatch.ReleaseFileForNtCreateSection(FileObject);
 	}
 	KdPrint(("%s Leave\n", __FUNCTION__));
 }
@@ -258,11 +258,11 @@ VOID Driver::__Routine_FastIoDispatch_Name__(FastIoDetachDevice)(
 	_In_ struct _DEVICE_OBJECT* TargetDevice
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	PDriver driver = GetDriver(SourceDevice->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->FastIoDetachDevice)
+	if (driver && driver->_FastIoDispatch.FastIoDetachDevice)
 	{
-		driver->_FastIoDispatch->FastIoDetachDevice(SourceDevice, TargetDevice);
+		driver->_FastIoDispatch.FastIoDetachDevice(SourceDevice, TargetDevice);
 	}
 	KdPrint(("%s Leave\n", __FUNCTION__));
 }
@@ -285,14 +285,14 @@ NTSTATUS Driver::__Routine_FastIoDispatch_Name__(AcquireForModWrite)(
 	_In_ struct _DEVICE_OBJECT* DeviceObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->AcquireForModWrite)
+	if (driver && driver->_FastIoDispatch.AcquireForModWrite)
 	{
-		status = driver->_FastIoDispatch->AcquireForModWrite(FileObject, EndingOffset,ResourceToRelease,DeviceObject);
+		status = driver->_FastIoDispatch.AcquireForModWrite(FileObject, EndingOffset,ResourceToRelease,DeviceObject);
 	}
-	KdPrint(("%s Leave Retuen : %d\n", __FUNCTION__,status));
+	KdPrint(("%s Leave Retuen : 0x%08X\n", __FUNCTION__,status));
 	return status;
 }
 
@@ -408,14 +408,14 @@ NTSTATUS Driver::__Routine_FastIoDispatch_Name__(ReleaseForModWrite)(
 	_In_ struct _DEVICE_OBJECT* DeviceObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->ReleaseForModWrite)
+	if (driver && driver->_FastIoDispatch.ReleaseForModWrite)
 	{
-		status = driver->_FastIoDispatch->ReleaseForModWrite(FileObject, ResourceToRelease, DeviceObject);
+		status = driver->_FastIoDispatch.ReleaseForModWrite(FileObject, ResourceToRelease, DeviceObject);
 	}
-	KdPrint(("%s Leave Retuen : %d\n", __FUNCTION__, status));
+	KdPrint(("%s Leave Retuen : 0x%08X\n", __FUNCTION__, status));
 	return status;
 }
 
@@ -424,14 +424,14 @@ NTSTATUS Driver::__Routine_FastIoDispatch_Name__(AcquireForCcFlush)(
 	_In_ struct _DEVICE_OBJECT* DeviceObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->AcquireForCcFlush)
+	if (driver && driver->_FastIoDispatch.AcquireForCcFlush)
 	{
-		status = driver->_FastIoDispatch->AcquireForCcFlush(FileObject, DeviceObject);
+		status = driver->_FastIoDispatch.AcquireForCcFlush(FileObject, DeviceObject);
 	}
-	KdPrint(("%s Leave Retuen : %d\n", __FUNCTION__, status));
+	KdPrint(("%s Leave Retuen : 0x%08X\n", __FUNCTION__, status));
 	return status;
 }
 
@@ -440,14 +440,14 @@ NTSTATUS Driver::__Routine_FastIoDispatch_Name__(ReleaseForCcFlush)(
 	_In_ struct _DEVICE_OBJECT* DeviceObject
 	)
 {
-	KdPrint(("%s Enter\n"));
+	KdPrint(("%s Enter\n", __FUNCTION__));
 	NTSTATUS status = STATUS_UNSUCCESSFUL;
 	PDriver driver = GetDriver(DeviceObject->DriverObject);
-	if (driver && driver->_FastIoDispatch && driver->_FastIoDispatch->ReleaseForCcFlush)
+	if (driver && driver->_FastIoDispatch.ReleaseForCcFlush)
 	{
-		status = driver->_FastIoDispatch->ReleaseForCcFlush(FileObject, DeviceObject);
+		status = driver->_FastIoDispatch.ReleaseForCcFlush(FileObject, DeviceObject);
 	}
-	KdPrint(("%s Leave Retuen : %d\n", __FUNCTION__, status));
+	KdPrint(("%s Leave Retuen : 0x%08X\n", __FUNCTION__, status));
 	return status;
 }
 
@@ -552,21 +552,30 @@ Driver::Driver(PDRIVER_OBJECT driverObject, PUNICODE_STRING registryPath)
 
 Driver::~Driver()
 {
-	if (this->_FastIoDispatch)
+	if (this->_DefaultFastIoDispatch)
 	{
-		delete this->_FastIoDispatch;
-	}
+		delete this->_DefaultFastIoDispatch;
+	}	
 }
 
-void Driver::_InitFastIoDispatch()
+void Driver::_InitDefaultFastIoDispatch()
 {
-	if (!this->_FastIoDispatch)
+	if (!this->_DefaultFastIoDispatch)
 	{
-		this->_FastIoDispatch = new FAST_IO_DISPATCH;
-		this->_FastIoDispatch->SizeOfFastIoDispatch = sizeof(FAST_IO_DISPATCH);
-#define __SetFastIoDispatch__(unuse,name) this->_FastIoDispatch->##name = Driver::__Routine_FastIoDispatch_Name__(name)
+		this->_DefaultFastIoDispatch = PFAST_IO_DISPATCH(ExAllocatePool(NonPagedPool, sizeof(FAST_IO_DISPATCH)));
+		RtlZeroMemory(this->_DefaultFastIoDispatch, sizeof(FAST_IO_DISPATCH));
+		this->_DefaultFastIoDispatch->SizeOfFastIoDispatch = sizeof(FAST_IO_DISPATCH);
+
+#define __SetDefaultFastIoDispatch__(unuse,name) this->_DefaultFastIoDispatch->##name = Driver::__Routine_FastIoDispatch_Name__(name)
 		//设置所有FastIo例程
-		__FastIoDispatch__(__SetFastIoDispatch__)
+		__FastIoDispatch__(__SetDefaultFastIoDispatch__);
+
+		PDRIVER_OBJECT driverObject = this->_DriverObject;
+
+		driverObject->FastIoDispatch = this->_DefaultFastIoDispatch;
+
+
+		RtlZeroMemory(&this->_FastIoDispatch, sizeof(FAST_IO_DISPATCH));
 	}
 }
 
@@ -629,11 +638,11 @@ bool Driver::ReleaseUserData()
 #define __DEFINE_SetFastIoDispatch__(type,name) \
 void Driver::SetFastIoDispatch_##name(type name)\
 {\
-	if (!this->_FastIoDispatch)\
+	if (!this->_DefaultFastIoDispatch)\
 	{\
-		this->Driver::_InitFastIoDispatch();\
+		this->_InitDefaultFastIoDispatch();\
 	}\
-	this->_FastIoDispatch->name = name;\
+	this->_FastIoDispatch.name = name;\
 }
 
 __FastIoDispatch__(__DEFINE_SetFastIoDispatch__)
@@ -651,7 +660,7 @@ void Driver::SetDriverUnload(PDRIVER_UNLOAD Unload) { this->_DriverUnload = Unlo
 
 void Driver::SetMajorFunction(UCHAR mj, PDRIVER_DISPATCH dispatch)
 {
-	if (mj < IRP_MJ_MAXIMUM_FUNCTION)
+	if (mj <= IRP_MJ_MAXIMUM_FUNCTION)
 	{
 		this->_MajorFunction[mj] = dispatch;
 	}

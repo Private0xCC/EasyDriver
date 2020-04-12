@@ -1,6 +1,6 @@
 #pragma once
-#include <wdm.h>
-
+#include <ntdef.h>
+#include <ntstatus.h>
 #ifdef __cplusplus
 extern "C"
 {
@@ -162,9 +162,22 @@ extern "C"
 #ifdef __DriverEntry__
 #pragma message("如果没有自定义的 [DriverEntry] 例程，则不要定义 [__DriverEntry__] 宏")
 #else
+#ifndef _DBGNT_
+	ULONG
+		__cdecl
+		DbgPrint(
+			_In_z_ _Printf_format_string_ PCSTR Format,
+			...
+		);
+#endif // _DBGNT_
+#if DBG 
+#define KdPrint(_x_) DbgPrint _x_
+#else
+#define KdPrint(_x_)
+#endif
+	typedef struct _DRIVER_OBJECT* PDRIVER_OBJECT;
 	NTSTATUS NTAPI DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING reg_path)
 	{
-		KdBreakPoint();
 		UNREFERENCED_PARAMETER(driver);
 		UNREFERENCED_PARAMETER(reg_path);
 		KdPrint(("%s\n", __FUNCTION__));

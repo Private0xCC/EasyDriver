@@ -18,6 +18,7 @@ void* __cdecl operator new(size_t size, POOL_TYPE type/* = PagedPool*/)
 #ifdef DBG
 	p = ExAllocatePoolWithTag(type, size, __TAG__);
 #else
+	UNREFERENCED_PARAMETER(type);
 	p = ExAllocatePool(PagedPool, size);
 #endif
 	RtlZeroMemory(p, size);

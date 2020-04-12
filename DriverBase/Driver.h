@@ -70,6 +70,9 @@ protected:
 	PDriver _Prev;
 	PDriver _Next;
 
+	//保存默认的FAST_IO_DISPATCH
+	PFAST_IO_DISPATCH _DefaultFastIoDispatch;
+
 	//用户自定义数据
 	PVOID _UserData;
 
@@ -77,7 +80,7 @@ protected:
 protected:
 	//开发者自定义例程
 	PDRIVER_ADD_DEVICE _AddDevice;
-	PFAST_IO_DISPATCH _FastIoDispatch;
+	FAST_IO_DISPATCH _FastIoDispatch;
 	PDRIVER_INITIALIZE _DriverInit;
 	PDRIVER_STARTIO _DriverStartIo;
 	PDRIVER_UNLOAD _DriverUnload;
@@ -130,8 +133,8 @@ protected:
 	//构造函数不对外开放
 	Driver(PDRIVER_OBJECT driverObject, PUNICODE_STRING registryPath);
 	~Driver();
-
-	void _InitFastIoDispatch();
+public:
+	void _InitDefaultFastIoDispatch();
 public:
 	NTSTATUS Init(DriverType type = DriverType::NT);
 

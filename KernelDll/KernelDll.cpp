@@ -1,5 +1,6 @@
 #define __KernelDll_Self__
 #include "KernelDll.h"
+#include <wdm.h>
 
 #ifdef DBG
 #define DebugInfo(x) DbgPrint x
@@ -54,7 +55,7 @@ in .def file
 sample:
 
 EXPORTS
-	;DllInitialize 和 DllUnload 必须使用 PRIVATE,即 该符号不出现在导入库中（lib文件）,其他模块无法链接到这两个符号(但是dll中的导出表中仍然有)
+	;DllInitialize 和 DllUnload 必须使用 PRIVATE,即 该符号不出现在导入库中（lib文件）,其他模块无法(隐式)链接到这两个符号(但是dll中的导出表中仍然有，可以显式链接)
 	DllInitialize = DllInitialize PRIVATE
 	DllUnload = DllUnload PRIVATE
 
