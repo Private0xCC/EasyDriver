@@ -160,6 +160,10 @@ public:
 
 	void SetMajorFunction(UCHAR mj, PDRIVER_DISPATCH dispatch);
 
+	void DisableDriverUnload();
+
+	void EnableDriverUnload();
+
 #pragma endregion
 
 

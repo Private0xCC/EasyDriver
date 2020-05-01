@@ -584,7 +584,8 @@ NTSTATUS Driver::Init(DriverType type)
 	KdPrint(("%s Enter\n", __FUNCTION__));
 	PDRIVER_OBJECT driverObject = this->_DriverObject;
 
-	driverObject->DriverUnload = Driver::_Routine_DriverUnload;
+	this->EnableDriverUnload();
+
 	for (UCHAR i = 0; i <= IRP_MJ_PNP; i++)
 	{
 		this->_MajorFunction[i] = driverObject->MajorFunction[i];
@@ -663,6 +664,22 @@ void Driver::SetMajorFunction(UCHAR mj, PDRIVER_DISPATCH dispatch)
 	if (mj <= IRP_MJ_MAXIMUM_FUNCTION)
 	{
 		this->_MajorFunction[mj] = dispatch;
+	}
+}
+
+void Driver::DisableDriverUnload()
+{
+	if (this->_DriverObject)
+	{
+		this->_DriverObject = nullptr;
+	}
+}
+
+void Driver::EnableDriverUnload()
+{
+	if (this->_DriverObject)
+	{
+		this->_DriverObject->DriverUnload = Driver::_Routine_DriverUnload;
 	}
 }
 
