@@ -28,6 +28,7 @@ CStyle NTSTATUS NTAPI DllInitialize(IN PUNICODE_STRING RegistryPath)
 
 CStyle NTSTATUS NTAPI DllUnload(VOID)
 {
+	KdBreakPoint();
 	KdPrint(("DriverBase %s\n", __FUNCTION__));
 	return STATUS_SUCCESS;
 }

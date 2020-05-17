@@ -671,7 +671,7 @@ void Driver::DisableDriverUnload()
 {
 	if (this->_DriverObject)
 	{
-		this->_DriverObject = nullptr;
+		this->_DriverObject->DriverUnload = nullptr;
 	}
 }
 
