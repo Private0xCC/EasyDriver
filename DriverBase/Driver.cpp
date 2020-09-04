@@ -29,9 +29,12 @@ VOID Driver::_Routine_DriverUnload(PDRIVER_OBJECT driverObject)
 	KdPrint(("DRIVER_OBJECT : %p\n", driverObject));
 
 	PDriver driver = GetDriver(driverObject);
-	if (driver && driver->_DriverUnload)
+	if (driver)
 	{
-		driver->_DriverUnload(driverObject);
+		if (driver->_DriverUnload)
+		{
+			driver->_DriverUnload(driverObject);
+		}
 		Driver::_RemoveDriver(driverObject);
 	}
 
