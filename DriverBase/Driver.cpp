@@ -1,7 +1,6 @@
 #define __DriverBase_Export__
 #include "Driver.h"
 #include "FunctionCode.h"
-#include "Operator.h"
 
 PDriver Driver::_FirstDirver = nullptr;
 

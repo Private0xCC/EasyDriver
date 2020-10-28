@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{954089EF-A832-4C8E-ADA2-4F8296402614}</ProjectGuid>
+    <ProjectGuid>{D99E205B-1A8B-4BC7-BDA2-56E57BB067A2}</ProjectGuid>
     <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-    <RootNamespace>DriverBase</RootNamespace>
+    <RootNamespace>KernelCRuntime</RootNamespace>
     <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -33,28 +33,28 @@
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <DriverType>WDM</DriverType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <DriverType>WDM</DriverType>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -67,73 +67,29 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(VC_IncludePath);$(CRT_IncludePath);$(KM_IncludePath);$(KIT_SHARED_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(VC_IncludePath);$(CRT_IncludePath);$(KM_IncludePath);$(KIT_SHARED_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(VC_IncludePath);$(CRT_IncludePath);$(KM_IncludePath);$(KIT_SHARED_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(VC_IncludePath);$(CRT_IncludePath);$(KM_IncludePath);$(KIT_SHARED_IncludePath)</IncludePath>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Link />
-    <ClCompile />
-    <Link />
-    <Link />
-    <ClCompile />
-    <ClCompile>
-      <AssemblerOutput>AssemblyCode</AssemblerOutput>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Link />
-    <Link />
-    <Link />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Link />
-    <Link />
-    <Link />
-    <Link />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Link />
-    <Link />
-    <Link />
-  </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Driver.cpp" />
-    <ClCompile Include="DriverBase.cpp" />
-    <ClCompile Include="Dll.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="FunctionCode.cpp" />
+    <ClInclude Include="delete.h" />
+    <ClInclude Include="KernelCRuntime.h" />
+    <ClInclude Include="malloc.h" />
+    <ClInclude Include="new.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Driver.h" />
-    <ClInclude Include="DriverBase.h" />
-    <ClInclude Include="FunctionCode.h" />
-    <ClInclude Include="Macro.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\KernelCRuntime\KernelCRuntime.vcxproj">
-      <Project>{d99e205b-1a8b-4bc7-bda2-56e57bb067a2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\KernelDll\KernelDll.vcxproj">
-      <Project>{166f7026-d26d-4de7-b780-3519c83c453f}</Project>
-    </ProjectReference>
+    <ClCompile Include="delete.cpp" />
+    <ClCompile Include="malloc.cpp" />
+    <ClCompile Include="new.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,12 +2,6 @@
 #include "KernelDll.h"
 #include <wdm.h>
 
-#ifdef DBG
-#define DebugInfo(x) DbgPrint x
-#else
-#define DebugInfo(x)
-#endif
-
 
 /*
 comment pragma
@@ -60,27 +54,30 @@ EXPORTS
 	DllUnload = DllUnload PRIVATE
 
 */
-#ifdef __cplusplus
-extern "C"
-{
-	
-#endif
 
-NTSTATUS NTAPI DefaultDllInitialize(IN PUNICODE_STRING RegistryPath)
+
+EXTERN_C NTSTATUS NTAPI DefaultDllInitialize(IN PUNICODE_STRING RegistryPath)
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
-	DebugInfo(("%s\nRegistryPath : %wZ\n", __FUNCTION__, RegistryPath));
+	KdPrint(("%s\nRegistryPath : %wZ\n", __FUNCTION__, RegistryPath));
 	
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS NTAPI DefaultDllUnload(VOID)
+EXTERN_C NTSTATUS NTAPI DefaultDllUnload(VOID)
 {
-	DebugInfo(("%s\n", __FUNCTION__));
+	KdPrint(("%s\n", __FUNCTION__));
 	
 	return STATUS_SUCCESS;
 }
 
-#ifdef __cplusplus
+NTSTATUS NTAPI DefaultDriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING reg_path)
+{
+	UNREFERENCED_PARAMETER(driver);
+	UNREFERENCED_PARAMETER(reg_path);
+	KdBreakPoint();
+	KdPrint(("%s\n", __FUNCTION__));
+	KdPrint(("driver : %p\nreg_path : %p\n", driver, reg_path));
+	return STATUS_UNSUCCESSFUL;
 }
-#endif
+

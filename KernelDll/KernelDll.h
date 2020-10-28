@@ -1,97 +1,93 @@
 #pragma once
 #include <ntdef.h>
 #include <ntstatus.h>
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 #ifndef __KernelDll_Self__//__KernelDll_Self__ 表示是 KernelDll 自己在使用本头文件，那么下面的内容则不需要
 
-	/*
-	内核dll必须要提供的三个函数。DllInitialize DllUnload DriverEntry(默认情况下需要，可更改入口点)
-	下面注释中的代码节选自 WRK 1.2
-	*/
-	/*
-	DllInitialize 和 DllUnload 只有在当前模块作为引用模块(非主模块)的时候才会被调用
-	MmLoadSystemImage,模块被作为主模块
-	MiLoadImportDll,模块被作为引用模块
-	*/
+/*
+内核dll必须要提供的三个函数。DllInitialize DllUnload DriverEntry(默认情况下需要，可更改入口点)
+下面注释中的代码节选自 WRK 1.2
+*/
+/*
+DllInitialize 和 DllUnload 只有在当前模块作为引用模块(非主模块)的时候才会被调用
+MmLoadSystemImage,模块被作为主模块
+MiLoadImportDll,模块被作为引用模块
+*/
 
-	/*
-	NTSTATUS
-		MmCallDllInitialize(
-			IN PKLDR_DATA_TABLE_ENTRY DataTableEntry,
-			IN PLIST_ENTRY ModuleListHead
-		)
-	{
-		NTSTATUS st;
-		PMM_DLL_INITIALIZE Func;
-		Func = (PMM_DLL_INITIALIZE)(ULONG_PTR)MiLocateExportName(DataTableEntry->DllBase, "DllInitialize");
-		if (!Func) {
-			return STATUS_SUCCESS;
-		}
-		st = Func(&RegistryPath);
-		if ((NT_SUCCESS(st)) &&
-			(MiFirstDriverLoadEver == 0) &&
-			(MiVerifierThunksAdded != ThunksAdded)) {
-
-			MiReApplyVerifierToLoadedModules(ModuleListHead);
-		}
-		return st;
+/*
+NTSTATUS
+	MmCallDllInitialize(
+		IN PKLDR_DATA_TABLE_ENTRY DataTableEntry,
+		IN PLIST_ENTRY ModuleListHead
+	)
+{
+	NTSTATUS st;
+	PMM_DLL_INITIALIZE Func;
+	Func = (PMM_DLL_INITIALIZE)(ULONG_PTR)MiLocateExportName(DataTableEntry->DllBase, "DllInitialize");
+	if (!Func) {
+		return STATUS_SUCCESS;
 	}
+	st = Func(&RegistryPath);
+	if ((NT_SUCCESS(st)) &&
+		(MiFirstDriverLoadEver == 0) &&
+		(MiVerifierThunksAdded != ThunksAdded)) {
 
-	NTSTATUS
-		MiResolveImageReferences(
-			PVOID ImageBase,
-			IN PUNICODE_STRING ImageFileDirectory,
-			IN PUNICODE_STRING NamePrefix OPTIONAL,
-			OUT PCHAR* MissingProcedureName,
-			OUT PWSTR* MissingDriverName,
-			OUT PLOAD_IMPORTS* LoadedImports
-		)
+		MiReApplyVerifierToLoadedModules(ModuleListHead);
+	}
+	return st;
+}
+
+NTSTATUS
+	MiResolveImageReferences(
+		PVOID ImageBase,
+		IN PUNICODE_STRING ImageFileDirectory,
+		IN PUNICODE_STRING NamePrefix OPTIONAL,
+		OUT PCHAR* MissingProcedureName,
+		OUT PWSTR* MissingDriverName,
+		OUT PLOAD_IMPORTS* LoadedImports
+	)
+{
+	NTSTATUS st;
+	st = MmCallDllInitialize(TableEntry, &PsLoadedModuleList);//如果没有导出 DllInitialize ，则直接返回 STATUS_SUCCESS，如果有则返回DllInitialize的返回值
+	//
+	// If the module could not be properly initialized,
+	// unload it.
+	//
+	if (!NT_SUCCESS(st)) {
+		//如果DllInitialize存在却没有返回成功，则从内存中卸载
+		MmUnloadSystemImage((PVOID)TableEntry);
+		Loaded = FALSE;
+	}
+}
+
+总结:如果有导出 DllInitialize 例程但是没有返回 STATUS_SUCCESS，则不能正确加载到内存中
+*/
+EXTERN_C NTSTATUS NTAPI DllInitialize(IN PUNICODE_STRING RegistryPath);
+
+/*
+LOGICAL
+MiCallDllUnloadAndUnloadDll(
+	IN PKLDR_DATA_TABLE_ENTRY DataTableEntry
+	)
+{
+	LOGICAL Unloaded = FALSE;
+	PMM_DLL_UNLOAD Func = (PMM_DLL_UNLOAD)(ULONG_PTR)MiLocateExportName(DataTableEntry->DllBase, "DllUnload");
+	if (Func)
 	{
-		NTSTATUS st;
-		st = MmCallDllInitialize(TableEntry, &PsLoadedModuleList);//如果没有导出 DllInitialize ，则直接返回 STATUS_SUCCESS，如果有则返回DllInitialize的返回值
-		//
-		// If the module could not be properly initialized,
-		// unload it.
-		//
-		if (!NT_SUCCESS(st)) {
-			//如果DllInitialize存在却没有返回成功，则从内存中卸载
-			MmUnloadSystemImage((PVOID)TableEntry);
-			Loaded = FALSE;
+		Status = Func();//调用 dll 的 DllUnload
+		if (NT_SUCCESS(Status)) {
+			MmUnloadSystemImage((PVOID)DataTableEntry);//从内存中卸载
+			Unloaded = TRUE;
 		}
 	}
-
-	总结:如果有导出 DllInitialize 例程但是没有返回 STATUS_SUCCESS，则不能正确加载到内存中
-	*/
-	NTSTATUS DllInitialize(IN PUNICODE_STRING RegistryPath);
-
-	/*
-	LOGICAL
-	MiCallDllUnloadAndUnloadDll(
-		IN PKLDR_DATA_TABLE_ENTRY DataTableEntry
-		)
-	{
-		LOGICAL Unloaded = FALSE;
-		PMM_DLL_UNLOAD Func = (PMM_DLL_UNLOAD)(ULONG_PTR)MiLocateExportName(DataTableEntry->DllBase, "DllUnload");
-		if (Func)
-		{
-			Status = Func();//调用 dll 的 DllUnload
-			if (NT_SUCCESS(Status)) {
-				MmUnloadSystemImage((PVOID)DataTableEntry);//从内存中卸载
-				Unloaded = TRUE;
-			}
-		}
-		return Unloaded;
-	}
-	只有当函数返回 TRUE 的时候，dll才被正确卸载，否则会驻留在内存中
-	总结:如果没有导出 DllUnload 例程或者没有返回 STATUS_SUCCESS，则 dll 无法被卸载
+	return Unloaded;
+}
+只有当函数返回 TRUE 的时候，dll才被正确卸载，否则会驻留在内存中
+总结:如果没有导出 DllUnload 例程或者没有返回 STATUS_SUCCESS，则 dll 无法被卸载
 
 
-	*/
-	NTSTATUS DllUnload(VOID);
+*/
+EXTERN_C NTSTATUS NTAPI DllUnload(VOID);
 
 #define __DEFAULT_LIB__ "KernelDll.lib"
 
@@ -157,42 +153,29 @@ extern "C"
 如果是dll项目且不想自定义 DriverEntry 入口例程，则直接使用 DefaultDriverEntry 宏 生成默认 DriverEntry 函数
 其他情况请自定义 DriverEntry 且不要使用 DefaultDriverEntry 宏
 例如：某些sys 也希望导出符号作为其他主模块的引用模块，但是由于一般 sys 会有自己的 DriverEntry,所以就不能再使用这个宏生成默认的DriverEntry
+
+dll 和 sys 无本质区别，sys 可以作为其他主模块的引用模块，dll 也可以作为主模块加载从而调用 DriverEntry
 */
 
 #ifdef __DriverEntry__
 #pragma message("如果没有自定义的 [DriverEntry] 例程，则不要定义 [__DriverEntry__] 宏")
 #else
-#ifndef _DBGNT_
-	ULONG
-		__cdecl
-		DbgPrint(
-			_In_z_ _Printf_format_string_ PCSTR Format,
-			...
-		);
-#endif // _DBGNT_
-#if DBG 
-#define KdPrint(_x_) DbgPrint _x_
-#else
-#define KdPrint(_x_)
-#endif
-	typedef struct _DRIVER_OBJECT* PDRIVER_OBJECT;
-	NTSTATUS NTAPI DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING reg_path)
-	{
-		UNREFERENCED_PARAMETER(driver);
-		UNREFERENCED_PARAMETER(reg_path);
-		KdPrint(("%s\n", __FUNCTION__));
-		KdPrint(("driver : %p\nreg_path : %p\n", driver, reg_path));
-		return STATUS_UNSUCCESSFUL;
-	}
+typedef struct _DRIVER_OBJECT* PDRIVER_OBJECT;
+NTSTATUS NTAPI DefaultDriverEntry(PDRIVER_OBJECT, PUNICODE_STRING);//这个函数包含在 KernelDll.lib 中，在 KernelDll.cpp 中定义。
+EXTERN_C NTSTATUS NTAPI DriverEntry(PDRIVER_OBJECT driver, PUNICODE_STRING reg_path)
+{
+	return DefaultDriverEntry(driver, reg_path);
+}
+#define __REQUIRE_DEFAULT_LIB__
 #pragma message("如果有自定义的 [DriverEntry] 例程，则定义 [__DriverEntry__] 宏")
 #endif
 
 #ifdef __REQUIRE_DEFAULT_LIB__
-	/*
-	如果定义了这个宏，则需要引入默认的lib
-	链接器选项 /nodefaultlib 将导致这个杂注被忽略
-	此时需要去掉 /nodefaultlib 或者手动添加 默认 lib
-	*/
+/*
+如果定义了这个宏，则需要引入默认的lib
+链接器选项 /nodefaultlib 将导致这个杂注被忽略
+此时需要去掉 /nodefaultlib 或者手动添加 默认 lib
+*/
 
 #pragma message(\
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KernelDll Warning<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"\
@@ -202,13 +185,9 @@ extern "C"
 "如果提示找不到符号，则需要去掉 [ /nodefaultlib ] 或者手动添加 [ KernelDll.lib ].\n"\
 )
 
-	//#pragma comment(lib,__DEFAULT_LIB__)
+//#pragma comment(lib,__DEFAULT_LIB__)
 #pragma ADDLIB(__DEFAULT_LIB__)
 
 #endif// end of __REQUIRE_DEFAULT_LIB__
 
 #endif//end of __KernelDll_Self__
-
-#ifdef __cplusplus
-}
-#endif

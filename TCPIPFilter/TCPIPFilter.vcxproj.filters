@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MinifilterQuickStart.cpp">
+    <ClCompile Include="TCPIPFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MinifilterQuickStart.h">
+    <ClInclude Include="TCPIPFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

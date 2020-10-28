@@ -17,9 +17,6 @@
     <ClCompile Include="Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Operator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Dll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,9 +32,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Driver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Operator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FunctionCode.h">

@@ -3,7 +3,6 @@
 //没有DriverEntry，使用默认DriverEntry
 //#define __DriverEntry__
 #include "../KernelDll/KernelDll.h"
-#include "Macro.h"
 #include <wdm.h>
 
 /*
@@ -19,17 +18,18 @@ KernelDll.h 中导出了内核需要的两个例程
 这三个函数不需要对外导出，所以也不提供对应的头文件。
 */
 
-CStyle NTSTATUS NTAPI DllInitialize(IN PUNICODE_STRING RegistryPath)
+EXTERN_C NTSTATUS NTAPI DllInitialize(IN PUNICODE_STRING RegistryPath)
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
 	KdPrint(("DriverBase %s : %p \nRegistryPath : %wZ\n", __FUNCTION__, DllInitialize, RegistryPath));
 	return STATUS_SUCCESS;
 }
 
-CStyle NTSTATUS NTAPI DllUnload(VOID)
+EXTERN_C NTSTATUS NTAPI DllUnload(VOID)
 {
 	KdBreakPoint();
 	KdPrint(("DriverBase %s\n", __FUNCTION__));
 	return STATUS_SUCCESS;
 }
+
 
