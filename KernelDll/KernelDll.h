@@ -150,9 +150,7 @@ EXTERN_C NTSTATUS NTAPI DllUnload(VOID);
 默认入口 _GsDriverEntry@8 中引用了 DriverEntry.
 如果当前模块作为其他主模块的引用模块，则入口函数永远不会调用。
 但是为了保证编译通过，所以必须要加上。
-如果是dll项目且不想自定义 DriverEntry 入口例程，则直接使用 DefaultDriverEntry 宏 生成默认 DriverEntry 函数
-其他情况请自定义 DriverEntry 且不要使用 DefaultDriverEntry 宏
-例如：某些sys 也希望导出符号作为其他主模块的引用模块，但是由于一般 sys 会有自己的 DriverEntry,所以就不能再使用这个宏生成默认的DriverEntry
+定义宏[__DriverEntry__]表示使用自定义的DriverEntry.否则将生成默认的 DriverEntry.
 
 dll 和 sys 无本质区别，sys 可以作为其他主模块的引用模块，dll 也可以作为主模块加载从而调用 DriverEntry
 */
